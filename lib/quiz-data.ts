@@ -10,6 +10,7 @@ export type Question = {
 };
 
 export type Archetype = {
+  id: string;
   range: [number, number];
   title: string;
   subtitle: string;
@@ -19,6 +20,7 @@ export type Archetype = {
 };
 
 export type LandingQuizData = {
+  landingPageId: string;
   slug: string;
   title: string;
   description: string;

@@ -20,6 +20,7 @@ export default function HomeClient({ quizData }: HomeClientProps) {
         <div className="w-full max-w-lg">
           <Quiz
             autoStart
+            landingPageId={quizData.landingPageId}
             questions={quizData.questions}
             archetypes={quizData.archetypes}
           />

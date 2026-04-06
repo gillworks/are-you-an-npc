@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { calculateScore, getArchetype, QUIZ_QUESTION_COUNT, selectQuestionsWithSeed } from '@/lib/quiz-data';
 import type { Archetype, Question } from '@/lib/quiz-data';
 import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
 import QuizResult from '@/components/QuizResult';
+import { saveQuizResult } from '@/lib/quiz-results';
 
 const QUIZ_SESSION_STORAGE_KEY = 'npc-quiz-session-v1';
 
@@ -21,6 +22,7 @@ type QuizState =
 
 type QuizProps = {
   autoStart?: boolean;
+  landingPageId: string;
   questions: Question[];
   archetypes: Archetype[];
 };
@@ -77,9 +79,10 @@ function resolveSeedForStart(): string {
   return existingSession?.active ? existingSession.seed : createSessionSeed();
 }
 
-export default function Quiz({ autoStart = false, questions, archetypes }: QuizProps) {
+export default function Quiz({ autoStart = false, landingPageId, questions, archetypes }: QuizProps) {
   const quizReady = questions.length > 0 && archetypes.length > 0;
   const questionCount = Math.min(QUIZ_QUESTION_COUNT, questions.length);
+  const persistedSeedsRef = useRef(new Set<string>());
   const [state, setState] = useState<QuizState>(() =>
     autoStart && quizReady
       ? { phase: 'question', seed: resolveSeedForStart(), index: 0, answers: [], selectedScore: null }
@@ -104,6 +107,32 @@ export default function Quiz({ autoStart = false, questions, archetypes }: QuizP
 
     saveQuizSession({ seed: state.seed, active: false });
   }, [state]);
+
+  useEffect(() => {
+    if (state.phase !== 'result') {
+      return;
+    }
+
+    if (persistedSeedsRef.current.has(state.seed)) {
+      return;
+    }
+
+    persistedSeedsRef.current.add(state.seed);
+    const archetype = getArchetype(archetypes, state.score);
+
+    void saveQuizResult({
+      sessionId: state.seed,
+      landingPageId,
+      archetypeId: archetype.id,
+      archetype: archetype.title,
+      score: state.score,
+      answerScores: state.answers,
+    }).catch((error) => {
+      // Allow retry if insertion fails after transient network/database errors.
+      persistedSeedsRef.current.delete(state.seed);
+      console.error('Failed to persist quiz result', error);
+    });
+  }, [archetypes, landingPageId, state]);
 
   function startQuiz() {
     if (!quizReady) return;

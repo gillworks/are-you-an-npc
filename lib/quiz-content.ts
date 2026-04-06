@@ -26,6 +26,7 @@ type AnswerRow = {
 };
 
 type ArchetypeRow = {
+  id: string;
   display_order: number;
   range_min: number;
   range_max: number;
@@ -63,7 +64,7 @@ export async function getQuizDataBySlug(slug: string): Promise<LandingQuizData |
         .order('question_order', { ascending: true }),
       supabase
         .from('archetypes')
-        .select('display_order, range_min, range_max, title, subtitle, description, emoji, color')
+        .select('id, display_order, range_min, range_max, title, subtitle, description, emoji, color')
         .eq('landing_page_id', landingPage.id)
         .order('display_order', { ascending: true }),
     ]);
@@ -106,6 +107,7 @@ export async function getQuizDataBySlug(slug: string): Promise<LandingQuizData |
   }
 
   return {
+    landingPageId: landingPage.id,
     slug: landingPage.slug,
     title: landingPage.title,
     description: landingPage.description,
@@ -120,6 +122,7 @@ export async function getQuizDataBySlug(slug: string): Promise<LandingQuizData |
         })),
     })),
     archetypes: archetypes.map((archetype) => ({
+      id: archetype.id,
       range: [archetype.range_min, archetype.range_max] as [number, number],
       title: archetype.title,
       subtitle: archetype.subtitle,
