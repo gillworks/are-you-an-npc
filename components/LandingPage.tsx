@@ -1,9 +1,11 @@
 'use client';
 
-import { archetypes } from '@/lib/quiz-data';
+import type { Archetype } from '@/lib/quiz-data';
 
 type LandingPageProps = {
   onStart: () => void;
+  archetypes: Archetype[];
+  questionCount: number;
 };
 
 const PIXEL_PARTICLES = [
@@ -26,7 +28,7 @@ const ARCHETYPE_GRADIENT_MAP: Record<string, string> = {
   'from-zinc-400 to-stone-500': 'from-zinc-400 to-stone-500',
 };
 
-export default function LandingPage({ onStart }: LandingPageProps) {
+export default function LandingPage({ onStart, archetypes, questionCount }: LandingPageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-[#0f0f1a] text-white">
       {/* ── HERO ── */}
@@ -111,9 +113,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
             <span className="ml-2 group-hover:translate-x-1 transition-transform duration-200 inline-block">→</span>
           </button>
 
-          <p className="text-xs text-zinc-600">
-            10 questions · No sign-up · No data collected
-          </p>
+          <p className="text-xs text-zinc-600">{questionCount} questions · No sign-up · No data collected</p>
         </div>
 
         {/* Scroll cue */}
@@ -137,7 +137,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
           {[
             {
               icon: '🎮',
-              title: '10 Scenarios',
+              title: `${questionCount} Scenarios`,
               body: 'Everyday situations you\'ll definitely recognize. Your honest answers reveal more than you think.',
             },
             {

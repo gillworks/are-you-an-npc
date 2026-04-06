@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { questions, calculateScore, getArchetype } from '@/lib/quiz-data';
+import { calculateScore, getArchetype } from '@/lib/quiz-data';
+import type { Archetype, Question } from '@/lib/quiz-data';
 import ProgressBar from '@/components/ProgressBar';
 import QuizQuestion from '@/components/QuizQuestion';
 import QuizResult from '@/components/QuizResult';
@@ -13,16 +14,20 @@ type QuizState =
 
 type QuizProps = {
   autoStart?: boolean;
+  questions: Question[];
+  archetypes: Archetype[];
 };
 
-export default function Quiz({ autoStart = false }: QuizProps) {
+export default function Quiz({ autoStart = false, questions, archetypes }: QuizProps) {
+  const quizReady = questions.length > 0 && archetypes.length > 0;
   const [state, setState] = useState<QuizState>(() =>
-    autoStart
+    autoStart && quizReady
       ? { phase: 'question', index: 0, answers: [], selectedScore: null }
       : { phase: 'intro' }
   );
 
   function startQuiz() {
+    if (!quizReady) return;
     setState({ phase: 'question', index: 0, answers: [], selectedScore: null });
   }
 
@@ -48,6 +53,14 @@ export default function Quiz({ autoStart = false }: QuizProps) {
     setState({ phase: 'intro' });
   }
 
+  if (!quizReady) {
+    return (
+      <div className="text-center text-zinc-400 text-sm sm:text-base">
+        This quiz is temporarily unavailable.
+      </div>
+    );
+  }
+
   if (state.phase === 'intro') {
     return (
       <div className="flex flex-col items-center gap-8 text-center">
@@ -56,7 +69,7 @@ export default function Quiz({ autoStart = false }: QuizProps) {
             Are You an NPC?
           </h1>
           <p className="text-zinc-400 text-base sm:text-lg max-w-sm leading-relaxed">
-            10 questions. Find out how scripted your daily life really is.
+            {questions.length} questions. Find out how scripted your daily life really is.
           </p>
         </div>
         <button
@@ -71,7 +84,7 @@ export default function Quiz({ autoStart = false }: QuizProps) {
   }
 
   if (state.phase === 'result') {
-    const archetype = getArchetype(state.score);
+    const archetype = getArchetype(archetypes, state.score);
     return <QuizResult score={state.score} archetype={archetype} answers={state.answers} onRetake={retake} />;
   }
 
