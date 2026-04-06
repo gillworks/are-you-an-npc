@@ -22,12 +22,14 @@ export const metadata: Metadata = {
     description:
       "Take the quiz and find out how NPC your daily life really is. Share your results!",
     type: "website",
+    siteName: "Are You an NPC?",
   },
   twitter: {
     card: "summary_large_image",
     title: "Are You an NPC?",
     description:
       "Take the quiz and find out how NPC your daily life really is. Share your results!",
+    creator: "@areyouannpc",
   },
 };
 

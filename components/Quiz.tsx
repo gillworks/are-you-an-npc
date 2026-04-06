@@ -9,7 +9,7 @@ import QuizResult from '@/components/QuizResult';
 type QuizState =
   | { phase: 'intro' }
   | { phase: 'question'; index: number; answers: number[]; selectedScore: number | null }
-  | { phase: 'result'; score: number };
+  | { phase: 'result'; score: number; answers: number[] };
 
 export default function Quiz() {
   const [state, setState] = useState<QuizState>({ phase: 'intro' });
@@ -29,7 +29,7 @@ export default function Quiz() {
 
       if (nextIndex >= questions.length) {
         const finalScore = calculateScore(newAnswers);
-        setState({ phase: 'result', score: finalScore });
+        setState({ phase: 'result', score: finalScore, answers: newAnswers });
       } else {
         setState({ phase: 'question', index: nextIndex, answers: newAnswers, selectedScore: null });
       }
@@ -64,7 +64,7 @@ export default function Quiz() {
 
   if (state.phase === 'result') {
     const archetype = getArchetype(state.score);
-    return <QuizResult score={state.score} archetype={archetype} onRetake={retake} />;
+    return <QuizResult score={state.score} archetype={archetype} answers={state.answers} onRetake={retake} />;
   }
 
   const question = questions[state.index];
