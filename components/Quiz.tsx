@@ -11,8 +11,16 @@ type QuizState =
   | { phase: 'question'; index: number; answers: number[]; selectedScore: number | null }
   | { phase: 'result'; score: number; answers: number[] };
 
-export default function Quiz() {
-  const [state, setState] = useState<QuizState>({ phase: 'intro' });
+type QuizProps = {
+  autoStart?: boolean;
+};
+
+export default function Quiz({ autoStart = false }: QuizProps) {
+  const [state, setState] = useState<QuizState>(() =>
+    autoStart
+      ? { phase: 'question', index: 0, answers: [], selectedScore: null }
+      : { phase: 'intro' }
+  );
 
   function startQuiz() {
     setState({ phase: 'question', index: 0, answers: [], selectedScore: null });
